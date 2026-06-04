@@ -1,6 +1,8 @@
 package main
 
 import (
+	"crypto/rand"
+	"encoding/base64"
 	"fmt"
 	"io"
 	"mime"
@@ -65,9 +67,12 @@ func (cfg *apiConfig) handlerUploadThumbnail(w http.ResponseWriter, r *http.Requ
 		respondWithError(w, http.StatusInternalServerError, "Invalid file", err)
 		return
 	}
+	randbyte := make([]byte, 32)
+	rand.Read(randbyte)
+	thumbnailId := base64.RawURLEncoding.EncodeToString((randbyte))
 
 	file_type := strings.Split(media_type, "/")
-	path := filepath.Join(cfg.assetsRoot, video.ID.String()+"."+file_type[1])
+	path := filepath.Join(cfg.assetsRoot, thumbnailId+"."+file_type[1])
 	file, err := os.Create(path)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Error creating thumbnail", err)
